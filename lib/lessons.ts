@@ -165,7 +165,7 @@ const lesson36: Lesson = {
   ],
 };
 
-const base: Lesson[] = [
+export const lessons: Lesson[] = [
   lesson("1.1", "m1", "Variables et types", 8, "Nommer un nombre, un texte, un booléen.", [
     "Un nom, une valeur. age = 27 range un entier, ville = \"Lyon\" une chaîne. Le type se déduit de la valeur, et type(age) le confirme.",
     "Avant d’analyser quoi que ce soit, on sait dire ce qu’on manipule\u202f: nombre, texte ou booléen.",
@@ -369,8 +369,6 @@ const base: Lesson[] = [
     "Le récit est ce qu’on peut envoyer.",
   ]),
 ];
-
-export const lessons: Lesson[] = base;
 
 export function getLesson(id: string) {
   return lessons.find((item) => item.id === id) ?? null;

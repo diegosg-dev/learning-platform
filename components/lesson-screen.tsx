@@ -118,6 +118,11 @@ export function LessonScreen({ lessonId }: { lessonId: string }) {
     window.scrollTo({ top: 0 });
   }
 
+  function advance() {
+    if (index === lesson!.steps.length - 1) finishLesson();
+    else go(index + 1);
+  }
+
   return (
     <div className="min-h-dvh bg-paper">
       <header className="no-print sticky top-0 z-20 border-b border-line bg-white/95 backdrop-blur">
@@ -201,8 +206,7 @@ export function LessonScreen({ lessonId }: { lessonId: string }) {
                 className="mt-6"
                 onClick={() => {
                   markDaily("video");
-                  if (index === lesson.steps.length - 1) finishLesson();
-                  else go(index + 1);
+                  advance();
                 }}
               >
                 {index === lesson.steps.length - 1 ? "Valider la leçon" : "Continuer"}
@@ -303,10 +307,7 @@ export function LessonScreen({ lessonId }: { lessonId: string }) {
               hint={step.hint}
               prompt={step.prompt}
               lessonId={lesson.id}
-              onPass={() => {
-                if (index === lesson.steps.length - 1) finishLesson();
-                else go(index + 1);
-              }}
+              onPass={advance}
             />
           </div>
         ) : null}

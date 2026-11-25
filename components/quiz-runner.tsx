@@ -181,7 +181,7 @@ export function QuizRunner({
               </p>
               <p className="mt-1 text-sm text-navy/80">{question.explanation}</p>
             </div>
-            <Button variant={correct ? "navy" : "navy"} size="pill" onClick={continueNext}>
+            <Button variant="navy" size="pill" onClick={continueNext}>
               Continuer
             </Button>
           </div>

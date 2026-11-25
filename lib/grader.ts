@@ -92,9 +92,7 @@ function parseString(source: string, index: number): Parsed<string> {
 function parseLiteral(source: string, index: number): Parsed<string | number | boolean> {
   const i = skip(source, index);
   if (source[i] === '"' || source[i] === "'") {
-    const text = parseString(source, i);
-    if (isErr(text)) return text;
-    return text;
+    return parseString(source, i);
   }
   const number = /^-?\d+(\.\d+)?/.exec(source.slice(i));
   if (number) return { value: Number(number[0]), i: i + number[0].length };
@@ -223,8 +221,7 @@ function applyCall(kind: "sort" | "head", rows: Row[], args: Arg[]): Row[] | Par
   return sortRows(rows, by, ascending);
 }
 
-function aggregate(rows: Row[], column: string, valueColumn: string, how: "sum") {
-  if (how !== "sum") return null;
+function aggregate(rows: Row[], column: string, valueColumn: string) {
   const totals = new Map<string, number>();
   for (const row of rows) {
     const key = String(column === "id" ? row.id : row[column as keyof Row]);
@@ -303,8 +300,7 @@ function parseExpr(source: string, index: number, env: Record<string, Row[]>): P
       }
       const sumArgs = parseArgs(source, skip(source, j + ".sum".length));
       if (isErr(sumArgs)) return sumArgs;
-      const records = aggregate(frame.rows, column, valueColumn.value, "sum");
-      if (!records) return { error: "Agrégation impossible." };
+      const records = aggregate(frame.rows, column, valueColumn.value);
       frame = { kind: "agg", columns: [column, valueColumn.value], records };
       i = sumArgs.i;
       continue;
@@ -505,17 +501,21 @@ const EXERCISES = {
 
 export type ExerciseId = keyof typeof EXERCISES;
 
+function failedRun(id: ExerciseId, error: string): ExerciseRun {
+  return {
+    ok: false,
+    error,
+    table: null,
+    tests: EXERCISES[id].map((test) => ({ id: test.id, label: test.label, pass: false })),
+    passed: false,
+  };
+}
+
 export function runExercise(id: ExerciseId, source: string): ExerciseRun {
   try {
     const result = execute(source);
     if ("error" in result) {
-      return {
-        ok: false,
-        error: result.error,
-        table: null,
-        tests: EXERCISES[id].map((test) => ({ id: test.id, label: test.label, pass: false })),
-        passed: false,
-      };
+      return failedRun(id, result.error);
     }
     const tests = EXERCISES[id].map((test) => ({
       id: test.id,
@@ -529,12 +529,6 @@ export function runExercise(id: ExerciseId, source: string): ExerciseRun {
       passed: tests.every((test) => test.pass),
     };
   } catch {
-    return {
-      ok: false,
-      error: "L’exécution s’est arrêtée. Vérifie les crochets et les parenthèses.",
-      table: null,
-      tests: EXERCISES[id].map((test) => ({ id: test.id, label: test.label, pass: false })),
-      passed: false,
-    };
+    return failedRun(id, "L’exécution s’est arrêtée. Vérifie les crochets et les parenthèses.");
   }
 }
